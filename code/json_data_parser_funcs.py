@@ -171,7 +171,7 @@ def parse_and_process_matches_dict(matches_dict:dict) -> pd.DataFrame:
                            f'{prefix}.country.name': 'country_name',
                            f'{prefix}.managers': 'managers'}
         
-        df_team_step_1 = df_matches[cols_to_extract.keys()]
+        df_team_step_1 = df_matches[cols_to_extract.keys()].copy()
         df_team_step_1.rename(columns=cols_to_extract, inplace=True)
         
         base_team_info_cols = ['team_id', 'team_name', 'team_gender', 'country_id', 'country_name']
@@ -228,7 +228,18 @@ def parse_and_process_matches_dict(matches_dict:dict) -> pd.DataFrame:
     dataframes_dict['df_team_managers_matches'] = df_team_managers_matches.drop_duplicates(ignore_index=True)
     dataframes_dict['df_managers_base_data'] = df_managers_base_data.drop_duplicates(ignore_index=True)
           
+    # generating the countries lookup table
+    df_countires = pd.DataFrame(columns=['country_id', 'country_name'])
+    for dframe in dataframes_dict.values():
+        if 'country_id' not in dframe.columns.tolist():
+            pass
+        else:
+            df_countires = pd.concat([df_countires, dframe[['country_id', 'country_name']]], axis=0, ignore_index=True)
+            dframe.drop(columns=['country_name'], inplace=True)
+    df_countires.drop_duplicates(ignore_index=True, inplace=True)
+    dataframes_dict['df_countries'] = df_countires
     return dataframes_dict
+
 
 if __name__ == "__main__":
     json_file_path = Path().cwd().parent / "data" / "competitions.json"
