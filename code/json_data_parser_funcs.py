@@ -1,7 +1,7 @@
 import pandas as pd
 from pathlib import Path
 
-from typing import Dict
+from typing import Dict, List
 from tabulate import tabulate
 from helpful_funcs import read_json_file_to_dict
 from helpful_funcs import downcast_all_numerical_cols_in_df
@@ -46,6 +46,76 @@ def parse_and_process_competitions_dict(competitions_dict:dict) -> Dict[str, pd.
     
     dict_return = {'competitions_df': df_competitions, 'seasons_df': df_seasons}
     return dict_return
+
+
+def get_competition_season_matches_json_file_paths(matches_dir_path:Path=None) -> List[Path]:
+    """
+    Due to the way the data is structured, the matches data is stored in a directory structure.
+    Where each competition has a directory, and each season has a directory inside the competition directory.
+    And each match is stored as a json file inside the season directory.
+    
+    We need to get the paths to all the json files, so we only iterate while reading, not while parsing.
+    
+    ## Parameters
+    matches_dir_path: Path, default=None
+        Path to the directory where the matches json files are stored. (default is the matches directory in the data directory)
+    
+    ## Returns
+    List[Path]
+        List of paths to the matches json files
+    """
+    if matches_dir_path is None:
+        matches_dir_path = Path().cwd().parent / "data" / "matches"
+    if not(matches_dir_path.exists() and matches_dir_path.is_dir()):
+        raise FileNotFoundError(f"Directory {matches_dir_path} does not exist.")
+    return list(matches_dir_path.glob(pattern='**/*.json'))
+
+def read_matches_dicts_from_json_files(matches_json_file_paths:List[Path]) -> List[dict]:
+    """
+    Reads the matches json files into a list of dictionaries.
+    
+    ## Parameters
+    matches_json_file_paths: List[Path]
+        List of paths to the matches json files
+    
+    ## Returns
+    List[dict]
+        List of dictionaries with the matches data
+    """
+    matches_dicts = []
+    for json_file_path in matches_json_file_paths:
+        matches_dicts.extend(read_json_file_to_dict(json_file_path))
+    return matches_dicts
+
+def parse_and_process_matches_dict(matches_dict:dict) -> pd.DataFrame:
+    df_matches = pd.json_normalize(matches_dict)
+    cols_to_drop = ['match_status',
+                    'match_status_360',
+                    'last_updated',
+                    'last_updated_360',
+                    'competition.country_name',
+                    'competition.competition_name',
+                    'season.season_name',
+                    'metadata.data_version',
+                    'metadata.shot_fidelity_version',
+                    'metadata.xy_fidelity_version']
+    cols_to_rename = {'competition.competition_id': 'competition_id',
+                      'season.season_id': 'season_id'}
+    
+    df_matches.drop(cols_to_drop, axis=1, inplace=True)
+    df_matches.rename(columns=cols_to_rename, inplace=True)
+    
+    # creating competiton stages table
+    competitions_stages_cols = ['competition_stage.id','competition_stage.name']
+    df_competition_stages = df_matches[competitions_stages_cols].drop_duplicates(ignore_index=True)
+    df_competition_stages.rename(columns={'competition_stage.id': 'competition_stage_id',
+                                          'competition_stage.name': 'competition_stage_name'},
+                                 inplace=True)
+    df_competition_stages = downcast_all_numerical_cols_in_df(df_competition_stages)
+    df_matches.drop(columns=competitions_stages_cols, inplace=True)
+    
+    #
+    return df_matches
 
 if __name__ == "__main__":
     json_file_path = Path().cwd().parent / "data" / "competitions.json"
