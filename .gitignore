@@ -1,2 +1,5 @@
 data_eng_env/*
 *.pyc
+code/testing.ipynb
+code/mongodb_creds.json
+.vscode/settings.json

@@ -1,0 +1,84 @@
+Table competitions [note: 'this table contains data about all the competitions, including international ones']
+{
+    competition_id int [primary key]
+    country_id int [ref: > countries.country_id]
+    country_name varchar [not null, note: 'this is left beacuse there are international competitions']
+    competition_name varchar [not null]
+    competiton_gender varchar
+    competiton_is_youth tinyint 
+    competition_is_international tinyint
+}
+
+Table seasons [note: 'this table contains date range off all the seasons in each competition, including international ones']
+{
+    competition_id int [ref: > competitions.competition_id, not null]
+    season_id int [not null , note: 'this is not ideal, but will allow it for time constraints']
+    season_start_year int [not null]
+    season_end_year int [not null]
+}
+
+Table countries [note: 'this is a lookup table for all countries in the database']
+{
+    country_id int [primary key]
+    country_name varchar [not null, unique]
+}
+
+Table stadiums [note: 'this table is a lookup table for all stadiums in the database']
+{
+    stadium_id int
+    stadium_name varchar [not null]
+    country_id int [ref: > countries.country_id]
+}
+
+Table managers_base_data [note: 'this table contains basic data about all the managers']
+{
+    manager_id int [primary key]
+    manager_name varchar [not null]
+    manager_nickname varchar
+    manager_dob date
+    country_id int [ref: > countries.country_id]
+}
+
+Table team_base_info [note: 'this table contains basic data about all the teams']
+{
+    team_id int [primary key]
+    team_name varchar [not null]
+    team_gender varchar
+    country_id int [ref: > countries.country_id]
+}
+
+Table referees [note: 'this table contains basic data about all the referees']
+{
+    referee_id int [primary key]
+    referee_name varchar [not null]
+    country_id int [ref: > countries.country_id]
+}
+
+Table competition_stages [note: 'this table is a lookup table for the different stages of a competition, e.g. group stage, round of 16, etc.']
+{
+    competition_stage_id int [primary key]
+    competition_stage_name varchar [not null]
+}
+
+Table matches [note: 'this table contains data about all the matches in the database']
+{
+    match_id int [primary key]
+    competition_id int [ref: > competitions.competition_id]
+    season_id int [note: 'not ideal but will allow it for time constraints']
+    home_team_id int [ref: > team_base_info.team_id, not null]
+    away_team_id int [ref: > team_base_info.team_id, not null]
+    home_score int
+    away_score int
+    match_week int
+    match_datetime datetime
+    competition_stage_id int [ref: > competition_stages.competition_stage_id]
+    stadium_id int [ref: > stadiums.stadium_id]
+    referee_id int [ref: > referees.referee_id]
+}
+
+Table team_managers_matches [note: 'this is a lookup table to show which managers managed which teams in which matches']
+{
+    team_id int [ref: > team_base_info.team_id]
+    manager_id int [ref: > managers_base_data.manager_id]
+    match_id int [ref: > matches.match_id]
+}
