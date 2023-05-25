@@ -6,7 +6,6 @@ from tabulate import tabulate
 from helpful_funcs import read_json_file_to_dict
 from helpful_funcs import downcast_all_numerical_cols_in_df
 
-
 def parse_and_process_competitions_dict(competitions_dict:dict) -> Dict[str, pd.DataFrame]:
     """
     Parses and processes the competitions dictionary,
@@ -44,12 +43,13 @@ def parse_and_process_competitions_dict(competitions_dict:dict) -> Dict[str, pd.
     df_competitions.drop_duplicates(ignore_index=True, inplace=True)
     df_competitions = downcast_all_numerical_cols_in_df(df_competitions)
     
-    dict_return = {'competitions_df': df_competitions, 'seasons_df': df_seasons}
+    dict_return = {'df_competitions': df_competitions, 'df_seasons': df_seasons}
     return dict_return
 
 
 def get_competition_season_matches_json_file_paths(matches_dir_path:Path=None) -> List[Path]:
     """
+    `deprecated since moving to mongodb.`\n
     Due to the way the data is structured, the matches data is stored in a directory structure.
     Where each competition has a directory, and each season has a directory inside the competition directory.
     And each match is stored as a json file inside the season directory.
@@ -70,8 +70,10 @@ def get_competition_season_matches_json_file_paths(matches_dir_path:Path=None) -
         raise FileNotFoundError(f"Directory {matches_dir_path} does not exist.")
     return list(matches_dir_path.glob(pattern='**/*.json'))
 
+
 def read_matches_dicts_from_json_files(matches_json_file_paths:List[Path]) -> List[dict]:
     """
+    `deprecated since moving to mongodb.`\n
     Reads the matches json files into a list of dictionaries.
     
     ## Parameters
@@ -86,6 +88,7 @@ def read_matches_dicts_from_json_files(matches_json_file_paths:List[Path]) -> Li
     for json_file_path in matches_json_file_paths:
         matches_dicts.extend(read_json_file_to_dict(json_file_path))
     return matches_dicts
+
 
 def parse_and_process_matches_dict(matches_dict:dict) -> Dict[str, pd.DataFrame]:
     """

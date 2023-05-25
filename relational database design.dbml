@@ -1,0 +1,70 @@
+Table competitions {
+    competition_id int [primary key]
+    country_id int [ref: > countries.country_id, not null]
+    competition_name varchar [not null]
+    competiton_gender varchar
+    competiton_is_youth tinyint 
+    competition_is_international tinyint
+}
+
+Table seasons {
+    competition_id int [ref: > competitions.competition_id, not null]
+    season_id int [not null] [note: 'this is not ideal, but will allow it for time constraints']
+    season_start_year int [not null]
+    season_end_year int [not null]
+}
+
+Table countries {
+    country_id int [primary key]
+    country_name varchar [not null, unique]
+}
+
+Table stadiums {
+    stadium_id int
+    stadium_name varchar [not null]
+    country_id int [ref: > countries.country_id]
+}
+
+Table managers_base_data {
+    manager_id int [primary key]
+    manager_name varchar [not null]
+    manager_nickname varchar
+    manager_dob date
+    country_id int [ref: > countries.country_id]
+}
+
+Table team_base_info {
+    team_id int [primary key]
+    team_name varchar [not null]
+    team_gender varchar
+    country_id int [ref: > countries.country_id]
+}
+
+Table referees {
+    referee_id int [primary key]
+    referee_name varchar [not null]
+    country_id int [ref: > countries.country_id]
+}
+
+Table competition_stages {
+    competition_stage_id int [primary key]
+    competition_stage_name varchar [not null]
+}
+
+Table matches {
+    match_id int [primary key]
+    competition_id int [ref: > competitions.competitions_id]
+    season_id int [note: 'not ideal but will allow it for time constraints']
+    home_team_id int [ref: > team_base_info.team_id, not null]
+    away_team_id int [ref: > team_base_info.team_id, not null]
+    home_score int
+    away_score int
+    match_week int
+    match_date date
+}
+
+Table team_managers_matches {
+    team_id int [ref: > team_base_info.team_id]
+    manager_id int [ref: > managers_base_data.manager_id]
+    match_id int [ref: > matches.match_id]
+}

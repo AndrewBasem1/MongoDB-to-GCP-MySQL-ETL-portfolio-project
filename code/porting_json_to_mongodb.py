@@ -1,3 +1,11 @@
+# This module was used to port the json files to mongodb.
+# it includes some processing to be concat mutiple json files into a single one.
+# the processing was mainly adding fields to each document in the json file, so they
+# can fit logically into a single collection in mongodb.
+#
+# it's not actively used, but it's here for reference.
+
+
 from helpful_funcs import read_json_file_to_dict
 from pathlib import Path
 from typing import List

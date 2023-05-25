@@ -4,7 +4,7 @@ from json import load as json_file_stream_to_dict
 from json import JSONDecodeError
 from pathlib import Path
 
-def read_json_file_to_dict(file_path:Path) -> dict:
+def read_json_file_to_dict(file_path:Path) -> dict: # deprecated since moving to mongodb
     """
     Reads a json file and returns a dictionary
     
