@@ -87,17 +87,79 @@ def read_matches_dicts_from_json_files(matches_json_file_paths:List[Path]) -> Li
         matches_dicts.extend(read_json_file_to_dict(json_file_path))
     return matches_dicts
 
-def parse_and_process_matches_dict(matches_dict:dict) -> pd.DataFrame:
+def parse_and_process_matches_dict(matches_dict:dict) -> Dict[str, pd.DataFrame]:
+    """
+    This function parses and processes the matches JSON files that were previously read into a dictionary.
+    And it produces a dictionary containing mutiple dataframe, each one will be saved to a separate table in the SQL database.
+    
+    ## Parameters
+    - matches_dict: dict
+        Dictionary with the matches data -> as read from the matches json files (all of them)
+    
+    ## Returns
+    - Dict[str, pd.DataFrame]: Dictionary with the ouptut dataframes, they are:
+    
+        1. `df_matches` -> the main matches dataframe, contains:
+            - match_id (`int`)
+            - home_score (`int`)
+            - away_score (`int`)
+            - match_week (`int`)
+            - competition_id (`int`)
+            - season_id (`int`)
+            - home_team_id (`int`)
+            - away_team_id (`int`)
+            - match_datetime (`datetime64[ns]`)
+        
+        2. `df_competition_stages` -> the competition stages dataframe, contains:
+            - competition_stage_id (`int`)
+            - competition_stage_name (`str`)
+            
+        3. `df_stadiums` -> the stadiums dataframe, contains:
+            - stadium_id (`int`)
+            - stadium_name (`str`)
+            - country_id (`int`)
+            
+        4. `df_referees` -> the referees dataframe, contains:
+            - referee_id (`int`)
+            - referee_name (`str`)
+            - country_id (`int`)
+        
+        5. `df_team_base_info` -> the teams base info dataframe, contains:
+            - team_id (`int`)
+            - team_name (`str`)
+            - team_gender (`str`)
+            - country_id (`int`)
+            
+        6. `df_team_managers_matches` -> this dataframe shows which manager managed which team in which match, contains:
+            - match_id (`int`)
+            - team_id (`int`)
+            - manager_id (`int`)
+        
+        7. `df_managers_base_data` -> the managers base data dataframe, contains:
+            - manager_id (`int`)
+            - manager_name (`str`)
+            - manager_nickname (`str`)
+            - manager_dob (`datetime64[ns]`)
+            - country_id (`int`)
+            
+        8. `df_countries` -> the countries dataframe, contains:
+            - country_id (`int`)
+            - country_name (`str`)
+            
+    """
+    
     df_matches = pd.json_normalize(matches_dict)
     
+    # match_date and kick_off are in different columns, we need to combine them into one column
     df_matches['match_datetime'] = (df_matches.match_date) + ' ' + (df_matches.kick_off)
     df_matches.match_datetime = pd.to_datetime(df_matches.match_datetime, format='%Y-%m-%d %H:%M:%S')
-    
     df_matches.drop(columns=['match_date', 'kick_off'], inplace=True)
     
-    
+    # the next dictionary will be used to hold all the dataframes that will be extracted from the matches JSON files
     dataframes_dict = {}
+    
     dataframes_dict['df_matches'] = df_matches
+    
     # dropping unnecessary columns (after visually inspecting the input data)
     cols_to_drop = ['match_status',
                     'match_status_360',
@@ -109,16 +171,17 @@ def parse_and_process_matches_dict(matches_dict:dict) -> pd.DataFrame:
                     'metadata.data_version',
                     'metadata.shot_fidelity_version',
                     'metadata.xy_fidelity_version']
+    df_matches.drop(cols_to_drop, axis=1, inplace=True)
+    
     cols_to_rename = {'competition.competition_id': 'competition_id',
                       'season.season_id': 'season_id'}
-
-    df_matches.drop(cols_to_drop, axis=1, inplace=True)
     df_matches.rename(columns=cols_to_rename, inplace=True)
     
     
     def extract_sub_df(cols_to_extract:Dict[str,str], dataframe_name:str) -> None:
         """
         Extracts a sub dataframe from the main matches dataframe, and adds it to the dataframes dictionary.
+        This will be used on non-nested columns (i.e. columns that are not dictionaries or lists).
         
         ## Parameters
         cols_to_extract: Dict[str,str]
@@ -161,6 +224,22 @@ def parse_and_process_matches_dict(matches_dict:dict) -> pd.DataFrame:
     extract_sub_df(referees_cols, dataframe_name)
     
     def parse_teams_and_managers_data(is_home_team:bool) -> Dict[str, pd.DataFrame]:
+        """
+        The teams and managers data is a bit more complex as it contains nested dictionaries and lists.
+        so this function will be used to parse their data.
+        
+        ## Parameters
+        is_home_team: bool
+            Whether to parse the home team data or the away team data
+            
+        ## Returns
+        Dict[str, pd.DataFrame]
+            A dictionary with the following dataframes:
+            - `df_team_base_info`
+            - `df_team_managers_matches`
+            - `df_managers_base_data`
+                
+        """
         prefix = 'home_team' if is_home_team else 'away_team'
         cols_to_extract = {'match_id': 'match_id',
                            f'{prefix}.{prefix}_id': 'team_id',
@@ -171,12 +250,15 @@ def parse_and_process_matches_dict(matches_dict:dict) -> pd.DataFrame:
                            f'{prefix}.country.name': 'country_name',
                            f'{prefix}.managers': 'managers'}
         
+        # extracting all the columns needed to build the subsequent dataframes
         df_team_step_1 = df_matches[cols_to_extract.keys()].copy()
         df_team_step_1.rename(columns=cols_to_extract, inplace=True)
         
+        # extracting the base team info
         base_team_info_cols = ['team_id', 'team_name', 'team_gender', 'country_id', 'country_name']
         df_team_base_info = df_team_step_1[base_team_info_cols].drop_duplicates(ignore_index=True)
         
+        # extracting the managers data, and the (team-match-manager) dataframe
         df_team_managers_step_1 = df_team_step_1[['match_id', 'team_id', 'managers']]
         df_team_managers_step_2 = df_team_managers_step_1.explode('managers').reset_index(drop=True)
         
@@ -216,7 +298,7 @@ def parse_and_process_matches_dict(matches_dict:dict) -> pd.DataFrame:
         
         return dict_return
     
-    # parsing home team data
+    # parsing home and away teams data
     dict_home_team_data = parse_teams_and_managers_data(is_home_team=True)
     dict_away_team_data = parse_teams_and_managers_data(is_home_team=False)
     
