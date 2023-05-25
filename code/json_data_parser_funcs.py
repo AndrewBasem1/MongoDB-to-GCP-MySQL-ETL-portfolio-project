@@ -46,7 +46,7 @@ def parse_and_process_competitions_dict(competitions_dict:dict) -> Dict[str, pd.
     dict_return = {'df_competitions': df_competitions, 'df_seasons': df_seasons}
     return dict_return
 
-
+# deprecated since moving to mongodb
 def get_competition_season_matches_json_file_paths(matches_dir_path:Path=None) -> List[Path]:
     """
     `deprecated since moving to mongodb.`\n
@@ -70,7 +70,7 @@ def get_competition_season_matches_json_file_paths(matches_dir_path:Path=None) -
         raise FileNotFoundError(f"Directory {matches_dir_path} does not exist.")
     return list(matches_dir_path.glob(pattern='**/*.json'))
 
-
+# deprecated since moving to mongodb
 def read_matches_dicts_from_json_files(matches_json_file_paths:List[Path]) -> List[dict]:
     """
     `deprecated since moving to mongodb.`\n
@@ -181,7 +181,9 @@ def parse_and_process_matches_dict(matches_dict:dict) -> Dict[str, pd.DataFrame]
     df_matches.rename(columns=cols_to_rename, inplace=True)
     
     
-    def extract_sub_df(cols_to_extract:Dict[str,str], dataframe_name:str) -> None:
+    def extract_sub_df(cols_to_extract:Dict[str,str],
+                       dataframe_name:str,
+                       cols_to_keep:Dict[str,str]=None) -> None:
         """
         Extracts a sub dataframe from the main matches dataframe, and adds it to the dataframes dictionary.
         This will be used on non-nested columns (i.e. columns that are not dictionaries or lists).
@@ -189,6 +191,8 @@ def parse_and_process_matches_dict(matches_dict:dict) -> Dict[str, pd.DataFrame]
         ## Parameters
         cols_to_extract: Dict[str,str]
             Dictionary with the columns to extract from the main matches dataframe, and the new names of these columns
+        cols_to_keep: Dict[str,str]
+            Dictionary with the columns to keep in the main matches dataframe, as well as their new names. these should be a subset of the cols_to_extract dictionary.
         dataframe_name: str
             Name of the new dataframe
         """
@@ -196,35 +200,52 @@ def parse_and_process_matches_dict(matches_dict:dict) -> Dict[str, pd.DataFrame]
         df.rename(columns=cols_to_extract, inplace=True)
         df = downcast_all_numerical_cols_in_df(df)
         dataframes_dict[dataframe_name] = df
-        df_matches.drop(list(cols_to_extract.keys()), axis=1, inplace=True)
+        if isinstance(cols_to_keep,dict):
+            if not(set(cols_to_keep.keys()).issubset(set(cols_to_extract.keys()))):
+                raise ValueError('cols_to_keep should be a subset of cols_to_extract')
+            cols_to_drop = [col_name for col_name in cols_to_extract.keys() if col_name not in cols_to_keep.keys()]
+            df_matches.drop(cols_to_drop, axis=1, inplace=True)
+            df_matches.rename(columns=cols_to_keep, inplace=True)
+        else:
+            cols_to_drop = list(cols_to_extract.keys())
+            df_matches.drop(cols_to_drop, axis=1, inplace=True)
         return None
     
     # creating competiton stages table
-    competitions_stages_cols={'competition_stage.id': 'competition_stage_id',
-                              'competition_stage.name': 'competition_stage_name'}
+    competitions_stages_cols_extract={'competition_stage.id': 'competition_stage_id',
+                                      'competition_stage.name': 'competition_stage_name'}
+    competitions_stages_cols_keep = {'competition_stage.id': 'competition_stage_id'}
     dataframe_name = 'df_competition_stages'
-    extract_sub_df(competitions_stages_cols, dataframe_name)
+    extract_sub_df(cols_to_extract = competitions_stages_cols_extract,
+                   cols_to_keep = competitions_stages_cols_keep,
+                   dataframe_name = dataframe_name)
     
     
     # NOTE: all of the upcoming dataframes will have a (country name <> country id) pair, I'll parse all of them into each table
     # and then finally prepare the countries table
     
     # creating stadiums table
-    stadiums_cols = {'stadium.id': 'stadium_id',
-                     'stadium.name': 'stadium_name',
-                     'stadium.country.id': 'country_id',
-                     'stadium.country.name': 'country_name'}
+    stadiums_cols_extract = {'stadium.id': 'stadium_id',
+                             'stadium.name': 'stadium_name',
+                             'stadium.country.id': 'country_id',
+                             'stadium.country.name': 'country_name'}
+    stadiums_cols_keep = {'stadium.id': 'stadium_id'}
     dataframe_name = 'df_stadiums'
-    extract_sub_df(stadiums_cols, dataframe_name)
+    extract_sub_df(cols_to_extract=stadiums_cols_extract, 
+                   cols_to_keep=stadiums_cols_keep,
+                   dataframe_name = dataframe_name)
     
     
     # creating referees table
-    referees_cols = {'referee.id': 'referee_id',
-                     'referee.name': 'referee_name',
-                     'referee.country.id': 'country_id',
-                     'referee.country.name': 'country_name'}
+    referees_cols_extract = {'referee.id': 'referee_id',
+                             'referee.name': 'referee_name',
+                             'referee.country.id': 'country_id',
+                             'referee.country.name': 'country_name'}
+    referees_cols_keep = {'referee.id': 'referee_id'}
     dataframe_name = 'df_referees'
-    extract_sub_df(referees_cols, dataframe_name)
+    extract_sub_df(cols_to_extract=referees_cols_extract, 
+                   cols_to_keep=referees_cols_keep,
+                   dataframe_name = dataframe_name)
     
     def parse_teams_and_managers_data(is_home_team:bool) -> Dict[str, pd.DataFrame]:
         """
@@ -325,6 +346,10 @@ def parse_and_process_matches_dict(matches_dict:dict) -> Dict[str, pd.DataFrame]
     dataframes_dict['df_countries'] = df_countires
     return dataframes_dict
 
+def normalize_countries_field_df_competitions(df_competitions:pd.DataFrame, df_countries:pd.DataFrame) -> pd.DataFrame:
+    df_competitions = df_competitions.merge(df_countries, how='left', on='country_name')
+    # df_competitions.drop(columns=['country_name'], inplace=True)
+    return df_competitions
 
 if __name__ == "__main__":
     json_file_path = Path().cwd().parent / "data" / "competitions.json"
