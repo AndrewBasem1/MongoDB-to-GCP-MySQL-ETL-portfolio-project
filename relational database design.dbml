@@ -25,7 +25,7 @@ Table countries [note: 'this is a lookup table for all countries in the database
 
 Table stadiums [note: 'this table is a lookup table for all stadiums in the database']
 {
-    stadium_id int
+    stadium_id int [primary key]
     stadium_name varchar [not null]
     country_id int [ref: > countries.country_id]
 }
