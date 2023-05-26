@@ -3,3 +3,4 @@ data_eng_env/*
 code/testing.ipynb
 code/mongodb_creds.json
 .vscode/settings.json
+code/mysql_creds.json
