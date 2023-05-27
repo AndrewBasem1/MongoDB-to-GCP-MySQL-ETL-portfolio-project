@@ -4,8 +4,8 @@ Table competitions [note: 'this table contains data about all the competitions, 
     country_id int [ref: > countries.country_id]
     country_name varchar [not null, note: 'this is left beacuse there are international competitions']
     competition_name varchar [not null]
-    competiton_gender varchar
-    competiton_is_youth tinyint 
+    competition_gender varchar
+    competition_is_youth tinyint 
     competition_is_international tinyint
 }
 

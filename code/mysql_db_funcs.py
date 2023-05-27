@@ -40,10 +40,10 @@ def run_sql_commands_from_file(sql_commands_file_path: Path, connection: sqlalch
     print(f'found {sql_commands_count} sql commands in {sql_commands_file_path}')
     
     try:
-        with connection.begin() as trans:
-            for i, sql_command in enumerate(sql_commands):
-                print(f'running command {i+1} of {sql_commands_count}')
-                connection.execute(sqlalchemy.text(sql_command))
+        for i, sql_command in enumerate(sql_commands):
+            print(f'running command {i+1} of {sql_commands_count}')
+            connection.execute(sqlalchemy.text(sql_command))
+        connection.commit()
         print('commiting the transaction')
     except Exception as e:
         print(f'error running sql command: {e}')
