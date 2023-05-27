@@ -1,3 +1,8 @@
+// this file contains the markdown design for the database
+// it uses the dbml syntax, which can be found here: https://www.dbml.org/home/
+// it's needed to generate the ERD using the dbdiagram.io tool
+// You can find the ERD diagram here: https://dbdiagram.io/d/646fdc2d7764f72fcfdd7ccd
+
 Table competitions [note: 'this table contains data about all the competitions, including international ones']
 {
     competition_id int [primary key]
