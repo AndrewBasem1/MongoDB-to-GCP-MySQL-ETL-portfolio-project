@@ -1,11 +1,16 @@
+// this file contains the markdown design for the database
+// it uses the dbml syntax, which can be found here: https://www.dbml.org/home/
+// it's needed to generate the ERD using the dbdiagram.io tool
+// You can find the ERD diagram here: https://dbdiagram.io/d/646fdc2d7764f72fcfdd7ccd
+
 Table competitions [note: 'this table contains data about all the competitions, including international ones']
 {
     competition_id int [primary key]
     country_id int [ref: > countries.country_id]
     country_name varchar [not null, note: 'this is left beacuse there are international competitions']
     competition_name varchar [not null]
-    competiton_gender varchar
-    competiton_is_youth tinyint 
+    competition_gender varchar
+    competition_is_youth tinyint 
     competition_is_international tinyint
 }
 
@@ -25,7 +30,7 @@ Table countries [note: 'this is a lookup table for all countries in the database
 
 Table stadiums [note: 'this table is a lookup table for all stadiums in the database']
 {
-    stadium_id int
+    stadium_id int [primary key]
     stadium_name varchar [not null]
     country_id int [ref: > countries.country_id]
 }

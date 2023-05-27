@@ -9,7 +9,7 @@ I'll start the project by defining milestones that build on each other, where ea
 ### **2.1. Milestone 1**
 
 - #### `End goal:`
-    - a local working ETL process using Python to transform nested JSON data into seperate pandas dataframes that can be then loaded into a PostgreSQL database.
+    - a local working ETL process using Python to transform nested JSON data into seperate pandas dataframes that can be then loaded into a mySQL database.
   
 - #### `Deliverables:`
     1. A JSON file containing the raw data (this will resemble the data -collection- that is stored in the MongoDB database), preferably having a nested structure. (or a public API that can give me access to live JSON data)
@@ -25,7 +25,7 @@ I'll start the project by defining milestones that build on each other, where ea
     - 1<sup>st</sup> day.
 
 - #### `Status:`
-    - In progress.
+    - Done.
 
 ### 2.2. Milestone 2
 
@@ -44,7 +44,7 @@ I'll start the project by defining milestones that build on each other, where ea
     - 2<sup>nd</sup> day.
 
 - #### `Status:`
-    - Not started.
+    - Done.
 
 ### 2.3. Milestone 3
 
@@ -60,10 +60,30 @@ I'll start the project by defining milestones that build on each other, where ea
     2. All items in the `Deliverables` section of Milestone 3.
 
 - #### `Timeframe:`
-    - 2<sup>nd</sup> day.
+    - 3<sup>rd</sup> day.
 
 - #### `Status:`
-    - Not started.
+    - Done.
   
 ### 2.4. Milestone 4
-- to be added later.
+
+- #### `End goal:`
+    - Creating proper documentation for the project. should include:
+      1. simple devlog that explains the process of the project.
+      2. Code comments and function docstrings.
+      3. A README file that explains the project and how to use it.
+      4. ERD diagram of the mySQL database.
+      5. A data guide that explains the collections in the MongoDB database.
+      6. Areas of improvement for the project.
+
+- #### `Deliverables:`
+    1. all points in the `End goal` section of Milestone 4.
+
+- #### `Actions to do:`
+    1. All items in the `End goal` section of Milestone 4.
+1. 
+- #### `Timeframe:`
+    - 4<sup>th</sup> day.
+
+- #### `Status:`
+    - Done.

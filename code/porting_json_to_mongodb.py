@@ -15,17 +15,14 @@ import pymongo.collection
 import pymongo.results
 
 
-def connect_to_mongo_database() -> pymongo.database.Database:
+def connect_to_mongo_database(creds_fp:Path=None) -> pymongo.database.Database:
     from pymongo.mongo_client import MongoClient
     from pymongo.server_api import ServerApi
-    # the credentials are stored in a json file
-    creds_json_path = Path().cwd() / 'mongodb_creds.json'
-    creds_dict = read_json_file_to_dict(creds_json_path)
-    username = creds_dict['username']
-    password = creds_dict['password']
-    uri = f'mongodb+srv://{username}:{password}@statsbomb.znogzta.mongodb.net/?retryWrites=true&w=majority'
+    if creds_fp is None:
+        creds_fp = Path().cwd() / 'creds' / 'mongodb_creds.json'
+    connection_string = read_json_file_to_dict(creds_fp)['connection_string']
     # Create a new client and connect to the server
-    client = pymongo.MongoClient(uri, server_api=ServerApi('1'))
+    client = pymongo.MongoClient(connection_string, server_api=ServerApi('1'))
     db = client.statsbomb
     return db
 

@@ -42,8 +42,12 @@ def parse_and_process_competitions_dict(competitions_dict:dict) -> Dict[str, pd.
     df_competitions.drop(['season_id', 'season_name'], axis=1, inplace=True)
     df_competitions.drop_duplicates(ignore_index=True, inplace=True)
     df_competitions = downcast_all_numerical_cols_in_df(df_competitions)
-    
+    df_competitions.rename(columns={'competition_youth': 'competition_is_youth',
+                                    'competition_international': 'competition_is_international'}
+                           , inplace=True)
     dict_return = {'df_competitions': df_competitions, 'df_seasons': df_seasons}
+    for df in dict_return.values():
+        df.dropna(how='all', axis=0, inplace=True)
     return dict_return
 
 # deprecated since moving to mongodb
@@ -344,6 +348,10 @@ def parse_and_process_matches_dict(matches_dict:dict) -> Dict[str, pd.DataFrame]
             dframe.drop(columns=['country_name'], inplace=True)
     df_countires.drop_duplicates(ignore_index=True, inplace=True)
     dataframes_dict['df_countries'] = df_countires
+    
+    for df in dataframes_dict.values():
+        df.dropna(how='all', axis=0, inplace=True)
+    
     return dataframes_dict
 
 def normalize_countries_field_df_competitions(df_competitions:pd.DataFrame, df_countries:pd.DataFrame) -> pd.DataFrame:
