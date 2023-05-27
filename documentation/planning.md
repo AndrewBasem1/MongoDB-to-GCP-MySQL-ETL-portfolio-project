@@ -73,7 +73,7 @@ I'll start the project by defining milestones that build on each other, where ea
       2. Code comments and function docstrings.
       3. A README file that explains the project and how to use it.
       4. ERD diagram of the mySQL database.
-      5. A data g buide that explains the collections in the MongoDB database.
+      5. A data guide that explains the collections in the MongoDB database.
       6. Areas of improvement for the project.
 
 - #### `Deliverables:`
@@ -86,4 +86,4 @@ I'll start the project by defining milestones that build on each other, where ea
     - 4<sup>th</sup> day.
 
 - #### `Status:`
-    - In progress.
+    - Done.
