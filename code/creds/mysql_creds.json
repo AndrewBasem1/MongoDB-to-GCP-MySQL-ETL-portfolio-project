@@ -1,3 +1,0 @@
-{
-    "connection_string":"mysql+pymysql://statsbomb-mysql:statsbomb_mysql_data_eng_password@34.18.1.138/statsbomb"
-}
