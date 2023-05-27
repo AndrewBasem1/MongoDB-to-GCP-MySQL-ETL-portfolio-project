@@ -21,12 +21,12 @@
 
 ### code structure
 you'll find all the code to be in the `code` directory, it will have:
-- `helpful_funcs.py` -> contains some basic functions that are used throughout the project.
-- `porting_json_to_mongo.py` -> contains the code to port the raw json files into mongoDB. (this is a one time thing, so it's not really a part of the ETL process)
-- `mongodb_downloader.py` -> contains the code to download a full collection from mongoDB as a dict.
-- `json_data_parser_funcs.py` -> this is the bread and butter of the transformation process, it contains functions that can process the JSON data into mutiple pandas dataframes, which mimic the SQL database schema.
-- `mysql_db_funcs.py` -> contains functions that can create the database schema using raw SQL as read from the [../sql_files/](../sql_files/) directory.
-- `main.py` -> combines all the above functions into a single script that can be run to perform the ETL process.
+- [`helpful_funcs.py`](code/helpful_funcs.py) -> contains some basic functions that are used throughout the project.
+- [`porting_json_to_mongo.py`](code/porting_json_to_mongo.py) -> contains the code to port the raw json files into mongoDB. (this is a one time thing, so it's not really a part of the ETL process)
+- [`mongodb_downloader.py`](code/mongodb_downloader.py) -> contains the code to download a full collection from mongoDB as a dict.
+- [`json_data_parser_funcs.py`](code/json_data_parser_funcs.py) -> this is the bread and butter of the transformation process, it contains functions that can process the JSON data into mutiple pandas dataframes, which mimic the SQL database schema.
+- [`mysql_db_funcs.py`](code/mysql_db_funcs.py) -> contains functions that can create the database schema using raw SQL as read from the [../sql_files/](../sql_files/) directory.
+- [`main.py`](code/main.py) -> combines all the above functions into a single script that can be run to perform the ETL process.
 
 ## Final database schema
 [![image](statsbombERD.png)](https://dbdiagram.io/d/646fdc2d7764f72fcfdd7ccd)
