@@ -27,13 +27,10 @@ def connect_to_mongo_database(creds_json_file_path:Path=None) -> pymongo.databas
     """
     # the credentials are stored in a json file
     if creds_json_file_path is None:
-        creds_json_path = Path().cwd() / 'mongodb_creds.json'
-    creds_dict = read_json_file_to_dict(creds_json_path)
-    username = creds_dict['username']
-    password = creds_dict['password']
-    uri = f'mongodb+srv://{username}:{password}@statsbomb.znogzta.mongodb.net/?retryWrites=true&w=majority'
+        creds_json_file_path = Path().cwd() / 'creds' / 'mongodb_creds.json'
+    connection_string = read_json_file_to_dict(creds_json_file_path)['connection_string']
     # Create a new client and connect to the server
-    client = pymongo.MongoClient(uri, server_api=pymongo.server_api.ServerApi('1'))
+    client = pymongo.MongoClient(connection_string, server_api=pymongo.server_api.ServerApi('1'))
     db = client.statsbomb
     return db
 

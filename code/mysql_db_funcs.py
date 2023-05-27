@@ -15,7 +15,7 @@ def create_sql_db_connection(creds_file_path: Path=None) -> sqlalchemy.Connectio
         A connection to the MySQL database.
     """
     if creds_file_path is None:
-        creds_file_path = Path().cwd() / 'mysql_creds.json'
+        creds_file_path = Path().cwd() / 'creds' / 'mysql_creds.json'
     connection_string = read_json_file_to_dict(creds_file_path)
     connection_engine = sqlalchemy.create_engine(url=connection_string['connection_string'])
     return connection_engine.connect()  

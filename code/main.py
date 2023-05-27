@@ -43,7 +43,7 @@ def main():
     with create_sql_db_connection() as mysql_connection:
         mysql_connection.begin()
         print('reading database schema creation commands from file')
-        sql_database_config_commands_file_path = Path().cwd() / 'database_schema_creation_commands.sql'
+        sql_database_config_commands_file_path = Path().cwd() / 'sql_files' / 'database_schema_creation_commands.sql'
         run_sql_commands_from_file(sql_commands_file_path=sql_database_config_commands_file_path,
                                 connection=mysql_connection)
         print('starting upload of data to mysql database')
@@ -71,7 +71,7 @@ def main():
             print(f'done uploading table {table_name}')
             
         print('creating foreign key constraints')
-        sql_foreign_key_constraints_commands_fp = Path().cwd() / 'database_foreign_keys.sql'
+        sql_foreign_key_constraints_commands_fp = Path().cwd() / 'sql_files' / 'database_foreign_keys.sql'
         run_sql_commands_from_file(sql_foreign_key_constraints_commands_fp, mysql_connection)
     print('done all ETL steps')
 
